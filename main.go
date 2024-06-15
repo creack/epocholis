@@ -65,38 +65,42 @@ func run() error {
 	c := newController(32, 16)
 
 	for i := range 16 {
-		newRoad(c.newBase(6+i, 2))
+		c.newRoad(6+i, 2)
 	}
 	for i := range 16 {
-		newRoad(c.newBase(6+i, 5))
+		c.newRoad(6+i, 5)
 	}
 	for i := range 4 {
-		newRoad(c.newBase(5, 2+i))
+		c.newRoad(5, 2+i)
 	}
 	for i := range 4 {
-		newRoad(c.newBase(22, 2+i))
+		c.newRoad(22, 2+i)
 	}
 
 	for i := range 2 {
-		newRoad(c.newBase(9, 3+i))
+		c.newRoad(9, 3+i)
 	}
 
 	for i := range 6 {
-		newRoad(c.newBase(23+i, 3))
+		c.newRoad(23+i, 3)
 	}
 	for i := range 3 {
-		newRoad(c.newBase(26, 2+i))
+		c.newRoad(26, 2+i)
 	}
 	for i := range 3 {
-		newRoad(c.newBase(4-i, 4))
+		c.newRoad(4-i, 4)
 	}
 
-	h := newHouse(c.newBase(10, 3))
-	h2 := newHouse(c.newBase(16, 3))
+	h := c.newHouse(10, 3)
+	h2 := c.newHouse(16, 3)
+	we := c.newWell(12, 1)
+	we2 := c.newWell(12, 6)
 loop:
 	c.render()
 	h.tick()
 	h2.tick()
+	we.tick()
+	we2.tick()
 	<-ticker.C
 	goto loop
 }

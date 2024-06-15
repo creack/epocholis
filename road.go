@@ -5,15 +5,15 @@ type road struct {
 	worker *worker
 }
 
-func newRoad(base base) *road {
-	r := &road{base: base}
+func (c *controller) newRoad(x, y int) *road {
+	r := &road{base: c.newBase(x, y)}
 	r.set(r)
 	return r
 }
 
 func (r *road) render() string {
 	if r.worker != nil {
-		return "W"
+		return r.worker.render()
 	}
 	var (
 		_, north = r.getNeigh(directionNorth).(*road)

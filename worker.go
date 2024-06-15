@@ -19,20 +19,31 @@ type worker struct {
 	base
 	direction direction
 
-	house    *house
 	curRoad  *road
 	prevRoad *road
 
 	waitTick int
+
+	resourceType  resourceType
+	resourceCount int
+
+	color string
 }
 
-func newWorker(road *road, house *house) *worker {
+func newWorker(road *road) *worker {
 	return &worker{
 		base:      road.base,
 		direction: directionEast,
 		curRoad:   road,
 		prevRoad:  nil,
 	}
+}
+
+func (w *worker) render() string {
+	if w.color == "" {
+		return "W"
+	}
+	return "\033[38;2;" + w.color + "mW\033[0m"
 }
 
 // NOTE: The caller must check that the move is valid before calling.
@@ -71,8 +82,23 @@ func (w *worker) tick() {
 		w.waitTick--
 		return
 	}
-	w.waitTick = 1
+	if w.resourceCount == 0 {
+		w.get().(*road).worker = nil
+		return
+	}
+	// Move.
+	w.actionMove()
+	// Perform actions.
+	for _, rc := range filterType[resourceConsumer](w.neighs()) {
+		rc.consumeResource(w)
+		if w.resourceCount <= 0 {
+			break
+		}
+	}
+}
 
+func (w *worker) actionMove() {
+	w.waitTick = 3
 	for _, dir := range allDirections {
 		if dir != w.direction {
 			continue
