@@ -6,7 +6,7 @@ import (
 )
 
 func clearScreen() {
-	fmt.Printf("\033c")
+	fmt.Printf("\033[2J\033[H")
 }
 
 type gridCase interface {
