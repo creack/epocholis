@@ -2,28 +2,68 @@ package main
 
 import "fmt"
 
-type workerDirection int
+type direction int
 
 const (
-	_ workerDirection = iota
-	workerDirectionNorth
-	workerDirectionSouth
-	workerDirectionEast
-	workerDirectionWest
+	_ direction = iota
+	directionNorth
+	directionSouth
+	directionEast
+	directionWest
 )
+
+//nolint:gochecknoglobals // Expected global.
+var allDirections = []direction{directionNorth, directionSouth, directionEast, directionWest}
 
 type worker struct {
 	base
-	direction workerDirection
+	direction direction
+
+	house    *house
+	curRoad  *road
+	prevRoad *road
 
 	waitTick int
 }
 
-func newWorker(base base) *worker {
+func newWorker(road *road, house *house) *worker {
 	return &worker{
-		base:      base,
-		direction: workerDirectionEast,
+		base:      road.base,
+		direction: directionEast,
+		curRoad:   road,
+		prevRoad:  nil,
 	}
+}
+
+// NOTE: The caller must check that the move is valid before calling.
+func (w *worker) move(dir direction) {
+	w.prevRoad = w.get().(*road)
+	w.prevRoad.worker = nil
+	w.direction = dir
+	switch dir {
+	case directionNorth:
+		w.y--
+	case directionSouth:
+		w.y++
+	case directionEast:
+		w.x++
+	case directionWest:
+		w.x--
+	default:
+		panic(fmt.Errorf("unknown direction %d", dir))
+	}
+	w.curRoad = w.get().(*road)
+	w.curRoad.worker = w
+}
+
+func (w *worker) lookupDirection(neigh *road) direction {
+	for _, dir := range allDirections {
+		r, ok := w.getNeigh(dir).(*road)
+		if ok && r == neigh {
+			return dir
+		}
+	}
+	return 0
 }
 
 func (w *worker) tick() {
@@ -31,31 +71,16 @@ func (w *worker) tick() {
 		w.waitTick--
 		return
 	}
-	w.waitTick = 5
-	w.get().(*road).worker = nil
-	switch w.direction {
-	case workerDirectionEast:
-		if w.x+1 < len(w.grid[0]) {
-			r, ok := w.grid[w.y][w.x+1].(*road)
-			if ok {
-				r.worker = w
-				w.x++
-				return
-			}
-		}
-		w.direction = workerDirectionWest
-	case workerDirectionWest:
-		if w.x-1 >= 0 {
-			r, ok := w.grid[w.y][w.x-1].(*road)
-			if ok {
-				r.worker = w
-				w.x--
-				return
-			}
-		}
-		w.direction = workerDirectionEast
-	default:
-		panic(fmt.Errorf("not implemented: %d", w.direction))
+	w.waitTick = 1
 
+	for _, dir := range allDirections {
+		if dir != w.direction {
+			continue
+		}
+		neighRoads := filterOutSingleElem(filterType[*road](w.neighs()), w.prevRoad)
+		if len(neighRoads) == 0 {
+			neighRoads = append(neighRoads, w.prevRoad)
+		}
+		w.move(w.lookupDirection(randElem(neighRoads)))
 	}
 }

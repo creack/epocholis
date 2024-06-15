@@ -23,10 +23,10 @@ func (h *house) tick() {
 		return
 	}
 
-	r := randElem(filter[*road](h.neighs()))
+	r := randElem(filterType[*road](h.neighs()))
 	if r == nil {
 		panic(fmt.Errorf("no road found"))
 	}
-	h.worker = newWorker(r.base)
+	h.worker = newWorker(r, h)
 	r.worker = h.worker
 }

@@ -67,6 +67,29 @@ func run() error {
 	for i := range 16 {
 		newRoad(c.newBase(6+i, 2))
 	}
+	for i := range 16 {
+		newRoad(c.newBase(6+i, 5))
+	}
+	for i := range 4 {
+		newRoad(c.newBase(5, 2+i))
+	}
+	for i := range 4 {
+		newRoad(c.newBase(22, 2+i))
+	}
+
+	for i := range 2 {
+		newRoad(c.newBase(9, 3+i))
+	}
+
+	for i := range 6 {
+		newRoad(c.newBase(23+i, 3))
+	}
+	for i := range 3 {
+		newRoad(c.newBase(26, 2+i))
+	}
+	for i := range 3 {
+		newRoad(c.newBase(4-i, 4))
+	}
 
 	h := newHouse(c.newBase(10, 3))
 	h2 := newHouse(c.newBase(16, 3))
